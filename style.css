@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    
+}
+
+body {
+    background-color: #D9BD66;
+}
+.container {
+    width: 100%;
+    max-width: 200px;
+    margin: 40px auto;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.icon-box {
+    background-color: #ADD8E6;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: 2px solid black;
+}
+
+.icon-box img {
+    width: 100%;
+    object-fit: cover;
+}
+
+img {
+    width: 100%;
+    object-fit: cover;
+}
+
+h1 {
+    grid-column: 1 / -1;
+    text-align: center;
+}

@@ -5,26 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="img/senor.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
-    <title>Contac List</title>
+    <title>Contact List</title>
 </head>
 <body>
-    <div class="container">
-    
-    <div class="icon-box">
-        <img src="img/telefono.png" alt="">
-    </div>
-    <div class="icon-box">
-        <img src="img/arroba.png" alt="">
-    </div>
-    <div class="icon-box">
-        <img src="img/carta.png" alt="">
-    </div>
-    <img src="img/mano.png" alt="">
-    <h1>Contact List</h1>
-</div>
-    
+    <div class="main-wrapper">
+        <!-- Header con iconos -->
+        <div class="header-container">
+            <div class="icon-box">
+                <img src="img/telefono.png" alt="Teléfono">
+            </div>
+            <div class="icon-box">
+                <img src="img/arroba.png" alt="Email">
+            </div>
+            <div class="icon-box">
+                <img src="img/carta.png" alt="Correo">
+            </div>
+            <img src="img/mano.png" alt="Mano" class="hand-icon">
+            <h1>Contact List</h1>
+        </div>
 
-    
-    
+        <!-- Formulario -->
+        <div class="form-container">
+            <form id="contactForm">
+                <input 
+                    type="text" 
+                    id="name" 
+                    placeholder="Input your name" 
+                    required
+                >
+                <input 
+                    type="text" 
+                    id="lastname" 
+                    placeholder="Input your lastname" 
+                    required
+                >
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    placeholder="Input your phone" 
+                    required
+                >
+                <input 
+                    type="text" 
+                    id="city" 
+                    placeholder="Input your city" 
+                    required
+                >
+                <input 
+                    type="text" 
+                    id="address" 
+                    placeholder="Input your address" 
+                    required
+                >
+                
+                <div class="gender-group">
+                    <label>
+                        <input type="radio" name="gender" value="Female" required>
+                        Female
+                    </label>
+                    <label>
+                        <input type="radio" name="gender" value="Male" required>
+                        Male
+                    </label>
+                </div>
+
+                <button type="submit" id="addBtn">ADD</button>
+            </form>
+        </div>
+
+        <!-- Spinner de carga -->
+        <div id="spinner" class="spinner hidden">
+            <div class="spinner-circle"></div>
+            <p>Cargando...</p>
+        </div>
+
+        <!-- Lista de contactos -->
+        <div class="contacts-list-container">
+            <div id="contactsList" class="contacts-list">
+                <!-- Los contactos se generan aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

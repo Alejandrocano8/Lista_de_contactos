@@ -1,3 +1,4 @@
+const API_URL = '/api/contacts';
 
 const contactForm = document.getElementById('contactForm');
 const nameInput = document.getElementById('name');
@@ -5,77 +6,41 @@ const lastnameInput = document.getElementById('lastname');
 const phoneInput = document.getElementById('phone');
 const cityInput = document.getElementById('city');
 const addressInput = document.getElementById('address');
-const genderInputs = document.querySelectorAll('input[name="gender"]');
 const addBtn = document.getElementById('addBtn');
 const contactsList = document.getElementById('contactsList');
 const spinner = document.getElementById('spinner');
 
-
-const STORAGE_KEY = 'contactsList';
-
-
-
-
-function getContacts() {
-    const contacts = localStorage.getItem(STORAGE_KEY);
-    return contacts ? JSON.parse(contacts) : [];
-}
-
-function saveContacts(contacts) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
-}
-
-
-function createContact(contact) {
-    return new Promise((resolve) => {
-        showSpinner();
-        setTimeout(() => {
-            const contacts = getContacts();
-            contact.id = Date.now();
-            contacts.push(contact);
-            saveContacts(contacts);
-            hideSpinner();
-            resolve(contact);
-        }, 1500); 
+async function createContact(contact) {
+    showSpinner();
+    const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contact)
     });
+    hideSpinner();
+    return res.json();
 }
 
-
-function readContacts() {
-    return getContacts();
+async function readContacts() {
+    const res = await fetch(API_URL);
+    return res.json();
 }
 
-
-function updateContact(id, updatedContact) {
-    return new Promise((resolve) => {
-        showSpinner();
-        setTimeout(() => {
-            const contacts = getContacts();
-            const index = contacts.findIndex(c => c.id === id);
-            if (index !== -1) {
-                contacts[index] = { ...contacts[index], ...updatedContact };
-                saveContacts(contacts);
-            }
-            hideSpinner();
-            resolve();
-        }, 1500);
+async function updateContact(id, updatedContact) {
+    showSpinner();
+    await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedContact)
     });
+    hideSpinner();
 }
 
- 
-function deleteContact(id) {
-    return new Promise((resolve) => {
-        showSpinner();
-        setTimeout(() => {
-            const contacts = getContacts();
-            const filteredContacts = contacts.filter(c => c.id !== id);
-            saveContacts(filteredContacts);
-            hideSpinner();
-            resolve();
-        }, 1500);
-    });
+async function deleteContact(id) {
+    showSpinner();
+    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    hideSpinner();
 }
-
 
 function validateForm() {
     const name = nameInput.value.trim();
@@ -85,61 +50,23 @@ function validateForm() {
     const address = addressInput.value.trim();
     const gender = document.querySelector('input[name="gender"]:checked');
 
-    if (!name) {
-        alert('Por favor, ingresa tu nombre');
-        nameInput.focus();
-        return false;
-    }
-
-    if (!lastname) {
-        alert('Por favor, ingresa tu apellido');
-        lastnameInput.focus();
-        return false;
-    }
-
-    if (!phone) {
-        alert('Por favor, ingresa tu teléfono');
-        phoneInput.focus();
-        return false;
-    }
-
-    if (!city) {
-        alert('Por favor, ingresa tu ciudad');
-        cityInput.focus();
-        return false;
-    }
-
-    if (!address) {
-        alert('Por favor, ingresa tu dirección');
-        addressInput.focus();
-        return false;
-    }
-
-    if (!gender) {
-        alert('Por favor, selecciona un género');
-        return false;
-    }
+    if (!name) { alert('Por favor, ingresa tu nombre'); nameInput.focus(); return false; }
+    if (!lastname) { alert('Por favor, ingresa tu apellido'); lastnameInput.focus(); return false; }
+    if (!phone) { alert('Por favor, ingresa tu teléfono'); phoneInput.focus(); return false; }
+    if (!city) { alert('Por favor, ingresa tu ciudad'); cityInput.focus(); return false; }
+    if (!address) { alert('Por favor, ingresa tu dirección'); addressInput.focus(); return false; }
+    if (!gender) { alert('Por favor, selecciona un género'); return false; }
 
     return true;
 }
 
+function showSpinner() { spinner.classList.remove('hidden'); }
+function hideSpinner() { spinner.classList.add('hidden'); }
 
-function showSpinner() {
-    spinner.classList.remove('hidden');
-}
+function getGenderIcon(gender) { return gender === 'Female' ? '👩' : '👨'; }
 
-function hideSpinner() {
-    spinner.classList.add('hidden');
-}
-
-function getGenderIcon(gender) {
-    return gender === 'Female' ? '👩' : '👨';
-}
-
-function renderContacts() {
-    const contacts = readContacts();
+function renderContacts(contacts) {
     contactsList.innerHTML = '';
-
     if (contacts.length === 0) {
         contactsList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No hay contactos registrados</p>';
         return;
@@ -162,32 +89,18 @@ function renderContacts() {
                 <button class="delete-btn" data-id="${contact.id}">🗑️</button>
             </div>
         `;
-
         contactsList.appendChild(contactElement);
     });
 
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', handleEdit);
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
-    });
+    document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleEdit));
+    document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDelete));
 }
 
-function clearForm() {
-    contactForm.reset();
-    nameInput.focus();
-}
-
-
+function clearForm() { contactForm.reset(); nameInput.focus(); }
 
 async function handleSubmit(e) {
     e.preventDefault();
-
-    if (!validateForm()) {
-        return;
-    }
+    if (!validateForm()) return;
 
     const contact = {
         name: nameInput.value.trim(),
@@ -200,16 +113,15 @@ async function handleSubmit(e) {
 
     await createContact(contact);
     clearForm();
-    renderContacts();
+    const contacts = await readContacts();
+    renderContacts(contacts);
 }
 
-function handleEdit(e) {
+async function handleEdit(e) {
     const id = parseInt(e.target.dataset.id);
-    const contacts = readContacts();
+    const contacts = await readContacts();
     const contact = contacts.find(c => c.id === id);
-
     if (!contact) return;
-
     showEditForm(id, contact);
 }
 
@@ -225,25 +137,16 @@ function showEditForm(id, contact) {
             <input type="tel" class="edit-phone" value="${contact.phone}" placeholder="Teléfono" required>
             <input type="text" class="edit-city" value="${contact.city}" placeholder="Ciudad" required>
             <input type="text" class="edit-address" value="${contact.address}" placeholder="Dirección" required>
-            
             <div class="gender-group">
-                <label>
-                    <input type="radio" name="edit-gender" value="Female" ${contact.gender === 'Female' ? 'checked' : ''} required>
-                    Female
-                </label>
-                <label>
-                    <input type="radio" name="edit-gender" value="Male" ${contact.gender === 'Male' ? 'checked' : ''} required>
-                    Male
-                </label>
+                <label><input type="radio" name="edit-gender" value="Female" ${contact.gender === 'Female' ? 'checked' : ''} required> Female</label>
+                <label><input type="radio" name="edit-gender" value="Male" ${contact.gender === 'Male' ? 'checked' : ''} required> Male</label>
             </div>
-
             <div style="display: flex; gap: 10px;">
                 <button type="button" class="save-btn" style="flex: 1;">Guardar</button>
                 <button type="button" class="cancel-btn" style="flex: 1;">Cancelar</button>
             </div>
         </form>
     `;
-
     contactsList.insertBefore(editContainer, contactsList.firstChild);
 
     const saveBtn = editContainer.querySelector('.save-btn');
@@ -257,7 +160,6 @@ function showEditForm(id, contact) {
         const editAddress = editContainer.querySelector('.edit-address').value.trim();
         const editGender = document.querySelector('input[name="edit-gender"]:checked');
 
-        
         if (!editName || !editLastname || !editPhone || !editCity || !editAddress || !editGender) {
             alert('Por favor, completa todos los campos');
             return;
@@ -274,70 +176,34 @@ function showEditForm(id, contact) {
 
         await updateContact(id, updatedContact);
         editContainer.remove();
-        renderContacts();
+        const contacts = await readContacts();
+        renderContacts(contacts);
     });
 
-    cancelBtn.addEventListener('click', () => {
-        editContainer.remove();
-    });
+    cancelBtn.addEventListener('click', () => editContainer.remove());
 }
 
 async function handleDelete(e) {
     const id = parseInt(e.target.dataset.id);
-    const contacts = readContacts();
+    const contacts = await readContacts();
     const contact = contacts.find(c => c.id === id);
-
     if (confirm(`¿Estás seguro de que deseas eliminar a ${contact.name} ${contact.lastname}?`)) {
         await deleteContact(id);
-        renderContacts();
+        const contacts = await readContacts();
+        renderContacts(contacts);
     }
 }
 
-
 contactForm.addEventListener('submit', handleSubmit);
 
-nameInput.addEventListener('blur', () => {
-    if (nameInput.value.trim() === '') {
-        nameInput.style.borderBottom = '2px solid red';
-    } else {
-        nameInput.style.borderBottom = 'none';
-    }
+[nameInput, lastnameInput, phoneInput, cityInput, addressInput].forEach(input => {
+    input.addEventListener('blur', () => {
+        input.style.borderBottom = input.value.trim() === '' ? '2px solid red' : 'none';
+    });
 });
 
-lastnameInput.addEventListener('blur', () => {
-    if (lastnameInput.value.trim() === '') {
-        lastnameInput.style.borderBottom = '2px solid red';
-    } else {
-        lastnameInput.style.borderBottom = 'none';
-    }
-});
-
-phoneInput.addEventListener('blur', () => {
-    if (phoneInput.value.trim() === '') {
-        phoneInput.style.borderBottom = '2px solid red';
-    } else {
-        phoneInput.style.borderBottom = 'none';
-    }
-});
-
-cityInput.addEventListener('blur', () => {
-    if (cityInput.value.trim() === '') {
-        cityInput.style.borderBottom = '2px solid red';
-    } else {
-        cityInput.style.borderBottom = 'none';
-    }
-});
-
-addressInput.addEventListener('blur', () => {
-    if (addressInput.value.trim() === '') {
-        addressInput.style.borderBottom = '2px solid red';
-    } else {
-        addressInput.style.borderBottom = 'none';
-    }
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderContacts();
+document.addEventListener('DOMContentLoaded', async () => {
+    const contacts = await readContacts();
+    renderContacts(contacts);
     nameInput.focus();
 });

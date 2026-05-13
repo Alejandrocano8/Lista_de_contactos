@@ -1,0 +1,26 @@
+{
+  "name": "lista-de-contactos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alejandrocano8/Lista_de_contactos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Alejandrocano8/Lista_de_contactos/issues"
+  },
+  "homepage": "https://github.com/Alejandrocano8/Lista_de_contactos#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
